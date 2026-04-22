@@ -1,4 +1,4 @@
-# ── Stage 1: download the CLIP model weights ─────────────────────────────────
+# Stage 1: download the CLIP model weights 
 # Separated into its own stage so Docker layer cache keeps the weights even
 # when app code changes. A code-only change won't re-download 600 MB.
 FROM python:3.11-slim AS model-downloader
@@ -11,19 +11,19 @@ ENV HF_HOME=/model_cache
 # Download CLIP once. The cache is baked into this layer and reused by the
 # final stage — zero download at container startup.
 RUN python -c "\
-from transformers import CLIPModel, CLIPProcessor; \
-CLIPModel.from_pretrained('openai/clip-vit-base-patch32'); \
-CLIPProcessor.from_pretrained('openai/clip-vit-base-patch32'); \
-print('CLIP model cached successfully')"
+    from transformers import CLIPModel, CLIPProcessor; \
+    CLIPModel.from_pretrained('openai/clip-vit-base-patch32'); \
+    CLIPProcessor.from_pretrained('openai/clip-vit-base-patch32'); \
+    print('CLIP model cached successfully')"
 
 
-# ── Stage 2: production image ─────────────────────────────────────────────────
+#  Stage 2: production image 
 FROM python:3.11-slim
 
 # System deps for Pillow
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        libgl1 \
-        libglib2.0-0 \
+    libgl1 \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -46,7 +46,7 @@ EXPOSE 8000
 
 # 2 workers for production. Increase if you have more CPU cores.
 CMD ["uvicorn", "app.main:app", \
-     "--host", "0.0.0.0", \
-     "--port", "8000", \
-     "--workers", "2", \
-     "--log-level", "info"]
+    "--host", "0.0.0.0", \
+    "--port", "8000", \
+    "--workers", "2", \
+    "--log-level", "info"]
